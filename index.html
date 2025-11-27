@@ -32,10 +32,9 @@
 <div id="countdown">Loading...</div>
 
 <script>
-// Helper: get a UTC timestamp representing a datetime in US Eastern time
+// Convert an Eastern time to a real UTC timestamp
 function easternToUTC(year, month, day, hour, minute = 0, second = 0) {
-  // Create the Eastern time as a formatted string
-  const formatter = new Intl.DateTimeFormat("en-US", {
+  const dtf = new Intl.DateTimeFormat("en-US", {
     timeZone: "America/New_York",
     year: "numeric",
     month: "2-digit",
@@ -46,25 +45,56 @@ function easternToUTC(year, month, day, hour, minute = 0, second = 0) {
     hour12: false
   });
 
-  const easternString = formatter.format(
-    new Date(Date.UTC(year, month - 1, day, hour, minute, second))
-  );
+  // Build a fake date in UTC, then reformat it in Eastern
+  const temp = new Date(Date.UTC(year, month - 1, day, hour, minute, second));
+  const parts = dtf.formatToParts(temp);
 
-  // Parse formatted string into components
-  const [m, d, y] = easternString.split(",")[0].split("/");
-  const [h, min, s] = easternString.split(", ")[1].split(":");
+  const get = type => parts.find(p => p.type === type).value;
 
-  // Convert this Eastern time (expressed as local components)
-  // into a real UTC timestamp
-  return Date.UTC(y, m - 1, d, h, min, s);
+  const y = parseInt(get("year"));
+  const m = parseInt(get("month")) - 1;
+  const d = parseInt(get("day"));
+  const h = parseInt(get("hour"));
+  const min = parseInt(get("minute"));
+  const s = parseInt(get("second"));
+
+  // Now interpret those Eastern parts as UTC
+  return Date.UTC(y, m, d, h, min, s);
+}
+
+// Get "now" in Eastern, converted to a UTC timestamp
+function getEasternNowUTC() {
+  const now = new Date();
+  const dtf = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false
+  });
+
+  const parts = dtf.formatToParts(now);
+  const get = type => parts.find(p => p.type === type).value;
+
+  const y = parseInt(get("year"));
+  const m = parseInt(get("month")) - 1;
+  const d = parseInt(get("day"));
+  const h = parseInt(get("hour"));
+  const min = parseInt(get("minute"));
+  const s = parseInt(get("second"));
+
+  return Date.UTC(y, m, d, h, min, s);
 }
 
 function updateCountdown() {
-  const nowUTC = Date.now();
-
-  // Target: Dec 12 @ 21:00 Eastern (this year)
   const year = new Date().getFullYear();
+
+  // Target: Dec 12, 21:00 Eastern
   const targetUTC = easternToUTC(year, 12, 12, 21, 0, 0);
+  const nowUTC = getEasternNowUTC();
 
   const diff = targetUTC - nowUTC;
 
@@ -73,9 +103,9 @@ function updateCountdown() {
     return;
   }
 
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+  const hours = Math.floor(diff / 3600000);
+  const minutes = Math.floor((diff % 3600000) / 60000);
+  const seconds = Math.floor((diff % 60000) / 1000);
 
   document.getElementById("countdown").textContent =
     `${hours}h ${minutes}m ${seconds}s`;
