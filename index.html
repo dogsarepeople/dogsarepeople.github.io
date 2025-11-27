@@ -28,75 +28,18 @@
 </head>
 <body>
 
-<h1>Countdown to Dec 12 at 21:00 Eastern</h1>
+<h1>Countdown to Dec 12 at 21:00 (your local time)</h1>
 <div id="countdown">Loading...</div>
 
 <script>
-// Convert an Eastern time to a real UTC timestamp
-function easternToUTC(year, month, day, hour, minute = 0, second = 0) {
-  const dtf = new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/New_York",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false
-  });
-
-  // Build a fake date in UTC, then reformat it in Eastern
-  const temp = new Date(Date.UTC(year, month - 1, day, hour, minute, second));
-  const parts = dtf.formatToParts(temp);
-
-  const get = type => parts.find(p => p.type === type).value;
-
-  const y = parseInt(get("year"));
-  const m = parseInt(get("month")) - 1;
-  const d = parseInt(get("day"));
-  const h = parseInt(get("hour"));
-  const min = parseInt(get("minute"));
-  const s = parseInt(get("second"));
-
-  // Now interpret those Eastern parts as UTC
-  return Date.UTC(y, m, d, h, min, s);
-}
-
-// Get "now" in Eastern, converted to a UTC timestamp
-function getEasternNowUTC() {
-  const now = new Date();
-  const dtf = new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/New_York",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false
-  });
-
-  const parts = dtf.formatToParts(now);
-  const get = type => parts.find(p => p.type === type).value;
-
-  const y = parseInt(get("year"));
-  const m = parseInt(get("month")) - 1;
-  const d = parseInt(get("day"));
-  const h = parseInt(get("hour"));
-  const min = parseInt(get("minute"));
-  const s = parseInt(get("second"));
-
-  return Date.UTC(y, m, d, h, min, s);
-}
-
 function updateCountdown() {
   const year = new Date().getFullYear();
 
-  // Target: Dec 12, 21:00 Eastern
-  const targetUTC = easternToUTC(year, 12, 12, 21, 0, 0);
-  const nowUTC = getEasternNowUTC();
+  // Dec 12 at 21:00 LOCAL TIME
+  const target = new Date(year, 11, 12, 21, 0, 0);
 
-  const diff = targetUTC - nowUTC;
+  const now = new Date();
+  const diff = target - now;
 
   if (diff <= 0) {
     document.getElementById("countdown").textContent = "The time has arrived!";
