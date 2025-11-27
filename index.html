@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>freedom</title>
+<title>Going Home</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 
@@ -33,7 +33,6 @@
     z-index: 2;
     max-width: 90%;
     text-align: center;
-    word-wrap: break-word;
   }
 
   @keyframes flicker {
@@ -42,7 +41,7 @@
       text-shadow:
         0 0 5px #00ffff,
         0 0 10px #00ffff,
-        0 0 20px #00ffff,
+        0 0 20px #0ff,
         0 0 40px #0ff,
         0 0 80px #0ff;
     }
@@ -53,40 +52,35 @@
   }
 
   #scroll-container {
-    position: relative;
     width: 50%;
-    max-width: 90%;
+    max-width: 50%;
+    min-width: 300px;
     margin-top: 20px;
-    height: 99rem; /* single line */
+    height: 3rem;
     overflow: hidden;
+    text-align: left;
+    position: relative;
   }
 
   #scroll-text {
-    font-size: 1.5rem;
-    line-height: 3rem;
+    display: inline-block;
+    font-size: 1.25rem;
     color: #00ffff;
-    text-align: center;
-    white-space: wrap;
-  }
-
-  .line {
-    position: absolute;
-    width: 100%;
-    top: 0;
-    left: 0;
-    opacity: 1;
-    transition: opacity 1s linear;
     text-shadow:
       0 0 5px #00ffff,
       0 0 10px #00ffff,
-      0 0 20px #00ffff,
+      0 0 20px #0ff,
       0 0 40px #0ff,
       0 0 80px #0ff;
+    white-space: nowrap;
+    position: absolute;
+    left: 0;
+    top: 0;
   }
 
   @media (max-width: 600px) {
     #countdown { font-size: 4rem; }
-    #scroll-text { font-size: 1rem; line-height: 2rem; }
+    #scroll-text { font-size: 1rem; }
     #scroll-container { height: 2rem; }
   }
 </style>
@@ -94,7 +88,6 @@
 <body>
 
 <div id="countdown">Loading...</div>
-
 <div id="scroll-container">
   <div id="scroll-text"></div>
 </div>
@@ -105,7 +98,6 @@
   function updateCountdown() {
     const now = new Date();
     const diff = target - now;
-
     if(diff <= 0){
       document.getElementById("countdown").textContent = "00:00:00.000";
       return;
@@ -121,10 +113,12 @@
   updateCountdown();
   setInterval(updateCountdown,50);
 
-  // Typing scroll
-  const container = document.getElementById('scroll-text');
+  // Quotes
+  const scrollText = document.getElementById('scroll-text');
+  const container = document.getElementById('scroll-container');
+
   const quotes = [
-    `We hold these truths to be self-evident, that all men are created equal, that they are endowed by their Creator with certain unalienable Rights, including Life, Liberty and the pursuit of Happiness.`,
+    `We hold these truths to be self-evident, that all men are created equal, that they are endowed by their Creator with certain unalienable Rights, including Life, Liberty and the pursuit of Happiness. That to secure these rights, Governments are instituted among Men, deriving their just powers from the consent of the governed,—That whenever any Form of Government becomes destructive of these ends, it is the Right of the People to alter or to abolish it, and to institute new Government, laying its foundation on such principles and organizing its powers in such form, as to them shall seem most likely to effect their Safety and Happiness.`,
     `Four score and seven years ago our fathers brought forth on this continent a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal.`,
     `The soldier’s duty is not measured by the dangers he faces, but by the faithfulness with which he performs his service. In peace or in war, in ease or in hardship, the soldier must dedicate himself to the nation’s call, knowing that liberty is preserved not by the comfort of the times, but by the courage and devotion of those willing to serve.`,
     `They who can give up essential liberty to obtain a little temporary safety deserve neither liberty nor safety. Rebellion to tyrants is obedience to God.`,
@@ -132,49 +126,29 @@
   ];
 
   let quoteIndex = 0;
+  let xPos = container.offsetWidth;
+  const scrollSpeed = 1.5; // pixels per frame
 
-  function typeQuote() {
-    const quote = quotes[quoteIndex].split(/(?<=\.)\s+/);
-    let lineIndex = 0;
-
-    function typeNextLine() {
-      if(lineIndex >= quote.length){
-        quoteIndex = (quoteIndex + 1) % quotes.length;
-        setTimeout(typeQuote, 500);
-        return;
-      }
-
-      // create new line
-      const line = document.createElement('div');
-      line.className = 'line';
-      container.appendChild(line);
-
-      // fade out previous line
-      const prev = container.querySelector('.line:not(:last-child)');
-      if(prev){
-        prev.style.opacity = 0;
-        setTimeout(()=>prev.remove(),1000);
-      }
-
-      // type characters
-      let charIndex = 0;
-      function typeChar(){
-        if(charIndex < quote[lineIndex].length){
-          line.textContent += quote[lineIndex][charIndex];
-          charIndex++;
-          setTimeout(typeChar,30);
-        } else {
-          lineIndex++;
-          setTimeout(typeNextLine,100);
-        }
-      }
-      typeChar();
-    }
-
-    typeNextLine();
+  function startScroll() {
+    scrollText.textContent = quotes[quoteIndex];
+    xPos = container.offsetWidth;
+    scrollText.style.left = xPos + 'px';
+    requestAnimationFrame(scrollQuote);
   }
 
-  typeQuote();
+  function scrollQuote() {
+    xPos -= scrollSpeed;
+    scrollText.style.left = xPos + 'px';
+    const textWidth = scrollText.offsetWidth;
+    if (xPos < -textWidth) {
+      quoteIndex = (quoteIndex + 1) % quotes.length;
+      startScroll();
+    } else {
+      requestAnimationFrame(scrollQuote);
+    }
+  }
+
+  startScroll();
 </script>
 
 </body>
