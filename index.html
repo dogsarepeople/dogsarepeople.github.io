@@ -39,6 +39,7 @@ const target = new Date(2025, 11, 12, 21, 0, 0);
 const start = Date.now();
 
 function updateCountdown() {
+  console.log("Date.now() = " + Date.now());
   // compute elapsed time since load
   const elapsed = Date.now() - start;
 
