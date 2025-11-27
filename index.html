@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Countdown</title>
+<title>freedom</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 
@@ -11,6 +11,7 @@
     margin: 0;
     padding: 0;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     height: 100vh;
@@ -21,7 +22,7 @@
   }
 
   #countdown {
-    font-size: 5rem;
+    font-size: 6rem;
     text-shadow:
       0 0 5px #00ffff,
       0 0 10px #00ffff,
@@ -29,6 +30,10 @@
       0 0 40px #0ff,
       0 0 80px #0ff;
     animation: flicker 1.5s infinite alternate;
+    z-index: 2;
+    max-width: 90%;
+    text-align: center;
+    word-wrap: break-word;
   }
 
   @keyframes flicker {
@@ -47,30 +52,42 @@
     }
   }
 
-  /* Optional subtle background grid for synthwave effect */
-  body::before {
-    content: '';
+  #scroll-container {
+    position: relative;
+    width: 50%;
+    max-width: 90%;
+    margin-top: 20px;
+    height: 99rem; /* single line */
+    overflow: hidden;
+  }
+
+  #scroll-text {
+    font-size: 1.5rem;
+    line-height: 3rem;
+    color: #00ffff;
+    text-align: center;
+    white-space: wrap;
+  }
+
+  .line {
     position: absolute;
-    top:0; left:0; right:0; bottom:0;
-    background: repeating-linear-gradient(
-      0deg,
-      rgba(0,255,255,0.05),
-      rgba(0,255,255,0.05) 1px,
-      transparent 1px,
-      transparent 20px
-    ),
-    repeating-linear-gradient(
-      90deg,
-      rgba(0,255,255,0.05),
-      rgba(0,255,255,0.05) 1px,
-      transparent 1px,
-      transparent 20px
-    );
-    pointer-events: none;
+    width: 100%;
+    top: 0;
+    left: 0;
+    opacity: 1;
+    transition: opacity 1s linear;
+    text-shadow:
+      0 0 5px #00ffff,
+      0 0 10px #00ffff,
+      0 0 20px #00ffff,
+      0 0 40px #0ff,
+      0 0 80px #0ff;
   }
 
   @media (max-width: 600px) {
-    #countdown { font-size: 3rem; }
+    #countdown { font-size: 4rem; }
+    #scroll-text { font-size: 1rem; line-height: 2rem; }
+    #scroll-container { height: 2rem; }
   }
 </style>
 </head>
@@ -78,35 +95,86 @@
 
 <div id="countdown">Loading...</div>
 
-<script>
-  // Target: Dec 12, 2025 00:00 Eastern = Dec 12, 2025 05:00 UTC
-  const target = new Date(Date.UTC(2025, 11, 12, 5, 0, 0));
+<div id="scroll-container">
+  <div id="scroll-text"></div>
+</div>
 
+<script>
+  // Countdown
+  const target = new Date(Date.UTC(2025, 11, 12, 5, 0, 0));
   function updateCountdown() {
     const now = new Date();
     const diff = target - now;
 
-    if (diff <= 0) {
+    if(diff <= 0){
       document.getElementById("countdown").textContent = "00:00:00.000";
       return;
     }
-
-    const totalHours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    const totalHours = Math.floor(diff / (1000*60*60));
+    const minutes = Math.floor((diff % (1000*60*60)) / (1000*60));
+    const seconds = Math.floor((diff % (1000*60))/1000);
     const milliseconds = diff % 1000;
 
-    const hh = String(totalHours).padStart(2, "0");
-    const mm = String(minutes).padStart(2, "0");
-    const ss = String(seconds).padStart(2, "0");
-    const ms = String(milliseconds).padStart(3, "0");
-
     document.getElementById("countdown").textContent =
-      `${hh}:${mm}:${ss}.${ms}`;
+      `${String(totalHours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}.${String(milliseconds).padStart(3,'0')}`;
+  }
+  updateCountdown();
+  setInterval(updateCountdown,50);
+
+  // Typing scroll
+  const container = document.getElementById('scroll-text');
+  const quotes = [
+    `We hold these truths to be self-evident, that all men are created equal, that they are endowed by their Creator with certain unalienable Rights, including Life, Liberty and the pursuit of Happiness.`,
+    `Four score and seven years ago our fathers brought forth on this continent a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal.`,
+    `The soldier’s duty is not measured by the dangers he faces, but by the faithfulness with which he performs his service. In peace or in war, in ease or in hardship, the soldier must dedicate himself to the nation’s call, knowing that liberty is preserved not by the comfort of the times, but by the courage and devotion of those willing to serve.`,
+    `They who can give up essential liberty to obtain a little temporary safety deserve neither liberty nor safety. Rebellion to tyrants is obedience to God.`,
+    `Government is not reason, it is not eloquence, it is force; like fire, a troublesome servant and a fearful master. Never for a moment should it be left to irresponsible action. The liberties of our country, the freedom of our civil constitution, are worth defending at all hazards; and it is our duty to defend them against all attacks.`
+  ];
+
+  let quoteIndex = 0;
+
+  function typeQuote() {
+    const quote = quotes[quoteIndex].split(/(?<=\.)\s+/);
+    let lineIndex = 0;
+
+    function typeNextLine() {
+      if(lineIndex >= quote.length){
+        quoteIndex = (quoteIndex + 1) % quotes.length;
+        setTimeout(typeQuote, 500);
+        return;
+      }
+
+      // create new line
+      const line = document.createElement('div');
+      line.className = 'line';
+      container.appendChild(line);
+
+      // fade out previous line
+      const prev = container.querySelector('.line:not(:last-child)');
+      if(prev){
+        prev.style.opacity = 0;
+        setTimeout(()=>prev.remove(),1000);
+      }
+
+      // type characters
+      let charIndex = 0;
+      function typeChar(){
+        if(charIndex < quote[lineIndex].length){
+          line.textContent += quote[lineIndex][charIndex];
+          charIndex++;
+          setTimeout(typeChar,30);
+        } else {
+          lineIndex++;
+          setTimeout(typeNextLine,100);
+        }
+      }
+      typeChar();
+    }
+
+    typeNextLine();
   }
 
-  updateCountdown();
-  setInterval(updateCountdown, 50);
+  typeQuote();
 </script>
 
 </body>
