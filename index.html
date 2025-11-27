@@ -28,15 +28,14 @@
 </head>
 <body>
 
-<h1>Countdown to Dec 12 at 21:00 (your local time)</h1>
+<h1>COUNT DOWN</h1>
 <div id="countdown">Loading...</div>
 
 <script>
 function updateCountdown() {
-  const year = new Date().getFullYear();
 
   // Dec 12 at 21:00 LOCAL TIME
-  const target = new Date(year, 11, 12, 21, 0, 0);
+  const target = new Date(2025, 11, 12, 21, 0, 0);
 
   const now = new Date();
   const diff = target - now;
