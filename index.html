@@ -18,58 +18,55 @@
     color: #fff;
     text-align: center;
   }
-
-  h1 {
-    font-size: 2rem;
-    margin-bottom: 20px;
-  }
-
-  #countdown {
-    font-size: 2.5rem;
-    font-weight: bold;
-  }
-
+  h1 { font-size: 2rem; margin-bottom: 20px; }
+  #countdown { font-size: 2.5rem; font-weight: bold; }
   @media (max-width: 500px) {
-    h1 {
-      font-size: 1.5rem;
-    }
-    #countdown {
-      font-size: 2rem;
-    }
+    h1 { font-size: 1.5rem; }
+    #countdown { font-size: 2rem; }
   }
 </style>
 </head>
 <body>
 
-<h1></h1>
+<h1>Countdown to Dec 12 at 21:00 Eastern</h1>
 <div id="countdown">Loading...</div>
 
 <script>
+// Helper: get a UTC timestamp representing a datetime in US Eastern time
+function easternToUTC(year, month, day, hour, minute = 0, second = 0) {
+  // Create the Eastern time as a formatted string
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false
+  });
+
+  const easternString = formatter.format(
+    new Date(Date.UTC(year, month - 1, day, hour, minute, second))
+  );
+
+  // Parse formatted string into components
+  const [m, d, y] = easternString.split(",")[0].split("/");
+  const [h, min, s] = easternString.split(", ")[1].split(":");
+
+  // Convert this Eastern time (expressed as local components)
+  // into a real UTC timestamp
+  return Date.UTC(y, m - 1, d, h, min, s);
+}
+
 function updateCountdown() {
-  // Target date: Dec 12 at 21:00 (9 PM) US Eastern Time
-  // Using America/New_York ensures correct Eastern Time handling
-  const target = new Date(
-    new Date().toLocaleString("en-US", {
-      timeZone: "America/New_York"
-    })
-  );
+  const nowUTC = Date.now();
 
-  // Now build the target date in Eastern Time
+  // Target: Dec 12 @ 21:00 Eastern (this year)
   const year = new Date().getFullYear();
-  const targetDateEastern = new Date(
-    new Date(
-      `${year}-12-12T21:00:00`
-    ).toLocaleString("en-US", { timeZone: "America/New_York" })
-  );
+  const targetUTC = easternToUTC(year, 12, 12, 21, 0, 0);
 
-  // Current time in Eastern Time
-  const nowEastern = new Date(
-    new Date().toLocaleString("en-US", {
-      timeZone: "America/New_York"
-    })
-  );
-
-  const diff = targetDateEastern - nowEastern;
+  const diff = targetUTC - nowUTC;
 
   if (diff <= 0) {
     document.getElementById("countdown").textContent = "The time has arrived!";
@@ -84,7 +81,6 @@ function updateCountdown() {
     `${hours}h ${minutes}m ${seconds}s`;
 }
 
-// Update immediately and then every second
 updateCountdown();
 setInterval(updateCountdown, 1000);
 </script>
