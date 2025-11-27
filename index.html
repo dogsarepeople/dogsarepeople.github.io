@@ -3,66 +3,110 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Countdown</title>
+<title>Retro 80s Countdown</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
   body {
     margin: 0;
     padding: 0;
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    font-family: Arial, sans-serif;
-    background: #111;
-    color: #fff;
-    text-align: center;
+    background: radial-gradient(circle at center, #0d0d0d, #000000);
+    font-family: 'VT323', monospace;
+    color: #00ffff;
+    overflow: hidden;
   }
-  h1 { font-size: 2rem; margin-bottom: 20px; }
-  #countdown { font-size: 2.5rem; font-weight: bold; }
-  @media (max-width: 500px) {
-    h1 { font-size: 1.5rem; }
-    #countdown { font-size: 2rem; }
+
+  #countdown {
+    font-size: 5rem;
+    text-shadow:
+      0 0 5px #00ffff,
+      0 0 10px #00ffff,
+      0 0 20px #00ffff,
+      0 0 40px #0ff,
+      0 0 80px #0ff;
+    animation: flicker 1.5s infinite alternate;
+  }
+
+  @keyframes flicker {
+    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+      opacity: 1;
+      text-shadow:
+        0 0 5px #00ffff,
+        0 0 10px #00ffff,
+        0 0 20px #00ffff,
+        0 0 40px #0ff,
+        0 0 80px #0ff;
+    }
+    20%, 24%, 55% {
+      opacity: 0.7;
+      text-shadow: none;
+    }
+  }
+
+  /* Optional subtle background grid for synthwave effect */
+  body::before {
+    content: '';
+    position: absolute;
+    top:0; left:0; right:0; bottom:0;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0,255,255,0.05),
+      rgba(0,255,255,0.05) 1px,
+      transparent 1px,
+      transparent 20px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(0,255,255,0.05),
+      rgba(0,255,255,0.05) 1px,
+      transparent 1px,
+      transparent 20px
+    );
+    pointer-events: none;
+  }
+
+  @media (max-width: 600px) {
+    #countdown { font-size: 3rem; }
   }
 </style>
 </head>
 <body>
 
-<h1>!</h1>
 <div id="countdown">Loading...</div>
 
 <script>
-// FIXED TARGET DATE (use the correct year!)
-const target = new Date(2025, 11, 12, 21, 0, 0);
+  // Target: Dec 12, 2025 00:00 Eastern = Dec 12, 2025 05:00 UTC
+  const target = new Date(Date.UTC(2025, 11, 12, 5, 0, 0));
 
-// STORE START TIME ONCE
-const start = Date.now();
+  function updateCountdown() {
+    const now = new Date();
+    const diff = target - now;
 
-function updateCountdown() {
-  console.log("Date.now() = " + Date.now());
-  // compute elapsed time since load
-  const elapsed = Date.now() - start;
+    if (diff <= 0) {
+      document.getElementById("countdown").textContent = "00:00:00.000";
+      return;
+    }
 
-  // now = start time + elapsed
-  const now = new Date(start + elapsed);
+    const totalHours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    const milliseconds = diff % 1000;
 
-  const diff = target - now;
+    const hh = String(totalHours).padStart(2, "0");
+    const mm = String(minutes).padStart(2, "0");
+    const ss = String(seconds).padStart(2, "0");
+    const ms = String(milliseconds).padStart(3, "0");
 
-  if (diff <= 0) {
-    document.getElementById("countdown").textContent = "The time has arrived!";
-    return;
+    document.getElementById("countdown").textContent =
+      `${hh}:${mm}:${ss}.${ms}`;
   }
 
-  const hours = Math.floor(diff / 3600000);
-  const minutes = Math.floor((diff % 3600000) / 60000);
-  const seconds = Math.floor((diff % 60000) / 1000);
-
-  document.getElementById("countdown").textContent =
-    `${hours}h ${minutes}m ${seconds}s`;
-}
-
-updateCountdown();
-setInterval(updateCountdown, 1000);
+  updateCountdown();
+  setInterval(updateCountdown, 50);
 </script>
 
 </body>
