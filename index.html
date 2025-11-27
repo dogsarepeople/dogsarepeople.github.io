@@ -32,12 +32,19 @@
 <div id="countdown">Loading...</div>
 
 <script>
+// FIXED TARGET DATE (use the correct year!)
+const target = new Date(2024, 11, 12, 21, 0, 0);
+
+// STORE START TIME ONCE
+const start = Date.now();
+
 function updateCountdown() {
+  // compute elapsed time since load
+  const elapsed = Date.now() - start;
 
-  // Dec 12 at 21:00 LOCAL TIME
-  const target = new Date(2025, 11, 12, 21, 0, 0);
+  // now = start time + elapsed
+  const now = new Date(start + elapsed);
 
-  const now = new Date();
   const diff = target - now;
 
   if (diff <= 0) {
